@@ -4,6 +4,12 @@ import java.util.Scanner;
 
 class LifeParser {
 
+    /**
+     * Parses a file to produce a boolean[][] and returns it.
+     *
+     * @param path the path of the file
+     * @return the boolean[][] of the dead and alive cells
+     */
     static boolean[][] getBoard(String path) {
         int width, height;
 
@@ -36,10 +42,6 @@ class LifeParser {
         int currentRow = 0, currentCol = 0;
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
-
-            // End
-            if (line.equals("===================="))
-                break;
 
             String[] nums = line.split(" ");
             for (String num : nums) {
