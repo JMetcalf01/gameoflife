@@ -2,7 +2,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * An implementation of Conway's Game of Life.
+ */
 class Board extends JFrame {
+
+    /**
+     * The method to call to initialize Board.
+     *
+     * @param filePath the filepath of the text file with the game board
+     * @param random whether to create a random array or load from a file
+     * @param percent the starting percent of life on the board
+     * @param width the width in cells for the board
+     * @param height the height in cells for the board
+     * @param delay the delay between frames
+     * @param color the color of life on the board
+     */
+    static void init(String filePath, boolean random, int percent, int width, int height, double delay, javafx.scene.paint.Color color) {
+        Board board = new Board(filePath, random, percent, width, height, delay, color);
+        board.start();
+    }
 
     private boolean[][] current, next;
 
@@ -21,11 +40,21 @@ class Board extends JFrame {
 
     private final double SECONDS;
 
+    /**
+     * Constructor for the Board class.
+     *
+     * @param filePath the filepath of the text file with the game board
+     * @param random whether to create a random array or load from a file
+     * @param percent the starting percent of life on the board
+     * @param width the width in cells for the board
+     * @param height the height in cells for the board
+     * @param delay the delay between frames
+     * @param color the color of life on the board
+     */
     private Board(String filePath, boolean random, int percent, int width, int height, double delay, javafx.scene.paint.Color color) {
 
-        this.filePath = filePath;
-
         // Initializes constants
+        this.filePath = filePath;
         PERCENT_ALIVE_AT_START = percent;
         SECONDS = delay;
         RANDOM = random;
@@ -50,10 +79,12 @@ class Board extends JFrame {
         current = new boolean[numWidth][numHeight];
         next = new boolean[numWidth][numHeight];
 
-        // Initializes GUI
         initGUI();
     }
 
+    /**
+     * Initializes the GUI for the Board.
+     */
     private void initGUI() {
         setTitle("Conway's Game Of Life");
         setBackground(Color.WHITE);
@@ -63,17 +94,18 @@ class Board extends JFrame {
         setVisible(true);
     }
 
-    static void init(String filePath, boolean random, int percent, int width, int height, double delay, javafx.scene.paint.Color color) {
-        Board board = new Board(filePath, random, percent, width, height, delay, color);
-        board.start();
-    }
-
+    /**
+     * Starts the game.
+     */
     private void start() {
+        // Either create a random array or load from the file
         if (RANDOM) {
             randomArray();
         } else {
             loadFromFile();
         }
+
+        // The game loop
         while (true) {
             iterate();
             try {
@@ -84,6 +116,12 @@ class Board extends JFrame {
         }
     }
 
+    /**
+     * Loads a starting board from a file by parsing it in LifeParser
+     *
+     * @see LifeParser
+     * @throws IllegalStateException if filepath is null
+     */
     private void loadFromFile() {
         if (filePath == null)
             throw new IllegalStateException("Filepath is null when it shouldn't be!");
@@ -92,6 +130,12 @@ class Board extends JFrame {
         resizeUI(current.length, current[0].length);
     }
 
+    /**
+     * Resizes the UI and arrays based on what the parser returns
+     *
+     * @param width the width of the new board
+     * @param height the height of the new board
+     */
     private void resizeUI(int width, int height) {
         // Initializes measurements
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -104,6 +148,10 @@ class Board extends JFrame {
         next = new boolean[numWidth][numHeight];
     }
 
+    /**
+     * Randomly generates a new array of true or false based
+     * on the percent alive at start originally inputted.
+     */
     private void randomArray() {
         Random rand = new Random();
         for (int row = 0; row < current.length; row++) {
@@ -115,6 +163,9 @@ class Board extends JFrame {
         }
     }
 
+    /**
+     * Renders, updates the next array, then copies next to current.
+     */
     private void iterate() {
         // Show current board using current array
         paint(getGraphics());
@@ -132,9 +183,18 @@ class Board extends JFrame {
         }
     }
 
+    /**
+     * Overridden method for rendering the screen.
+     *
+     * @param g the graphics object
+     *
+     * @see Graphics
+     */
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+
+        // For every cell, either paint a rectangle of the color of the cell (its color if alive, white if dead)
         for (int row = 0; row < current.length; row++) {
             for (int col = 0; col < current[row].length; col++) {
                 if (current[row][col]) {
@@ -147,6 +207,16 @@ class Board extends JFrame {
         }
     }
 
+    /**
+     * Checks the four conditions whether a cell should update itself:
+     * 1) If a live cell has less than two neighbors around itself, it dies as if by underpopulation.
+     * 2) If a live cell has greater than three neighbors around itself, it dies as if by overpopulation.
+     * 3) If a dead cell has exactly three neighbors around itself, it becomes a live cell as if by reproduction.
+     * 4) If a live cell has two or three neighbors, it stays alive.
+     *
+     * @param row the row to check
+     * @param col the col to check
+     */
     private void runTests(int row, int col) {
         if (cellAlive(row, col) && returnAliveNeighbors(row, col) < 2) {
             next[row][col] = false;
@@ -157,6 +227,13 @@ class Board extends JFrame {
         }
     }
 
+    /**
+     * Returns the number of alive cells around it, including diagonally.
+     *
+     * @param row the row to check
+     * @param col the col to check
+     * @return the number of neighbors
+     */
     private int returnAliveNeighbors(int row, int col) {
         int neighbors = 0;
 
@@ -206,14 +283,37 @@ class Board extends JFrame {
         return neighbors;
     }
 
+    /**
+     * Returns whether the cell is alive or not.
+     *
+     * @param row the row to check
+     * @param col the col to check
+     * @return whether the cell is alive
+     */
     private boolean cellAlive(int row, int col) {
         return current[row][col];
     }
 
+    /**
+     * Returns whether the cell is dead or not.
+     *
+     * @param row the row to check
+     * @param col the col to check
+     * @return whether the cell is dead
+     */
     private boolean cellDead(int row, int col) {
         return !current[row][col];
     }
 
+    /**
+     * If in trippy mode, return a random color.
+     *
+     * Otherwise, return the color the user put it (defaults to black).
+     *
+     * @see javafx.scene.paint.Color
+     * @see java.awt.Color
+     * @return the color of the cell
+     */
     private Color getColor() {
         if (TRIPPY) {
             Random random = new Random();

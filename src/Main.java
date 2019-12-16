@@ -14,6 +14,11 @@ public class Main extends Application {
     private static final double DEFAULT_SPEED = 0.05;
     private static final Color DEFAULT_COLOR = Color.BLACK;
 
+    /**
+     * Starts the JavaFX application.
+     *
+     * @param primaryStage the primary stage
+     */
     @Override
     public void start(Stage primaryStage) {
 
